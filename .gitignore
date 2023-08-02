@@ -162,3 +162,7 @@ cython_debug/
 
 # Mac
 .DS_Store
+
+tmp
+**/*.h5
+**/*.pkl
