@@ -167,3 +167,4 @@ tmp
 **/*.h5
 **/*.pkl
 /**/*.bin
+node_modules
