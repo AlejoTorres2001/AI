@@ -34,7 +34,7 @@ function App() {
     formData.append('data', JSON.stringify({ json_data: jsonData }));
 
     try {
-      const response = await axios.post<JsonResponse>('http://localhost:8000/upload', formData, {
+      const response = await axios.post<JsonResponse>('http://localhost:8000/summarize', formData, {
          headers: {
            'Content-Type': 'multipart/form-data',
          },
