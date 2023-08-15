@@ -3,10 +3,11 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-from services.parsers import construct_pdf,parse_json,is_valid_schema
-
+from services.parsers import construct_pdf,parse_json,is_valid_schema,extract_text,get_documents
+from services.data import create_embeddings,get_relevant_documents_indexes,get_documents_by_index
+from prompts import MAP_PROMPT_EN,COMBINE_PROMPT_EN
+from services.inference import create_map_summarization_chain,create_llm,summarize_docs,synthesis
 app = FastAPI()
 
 origins = [
@@ -32,14 +33,21 @@ async def upload_file(file: UploadFile = File(...),data: str = Form(...)):
         return JSONResponse(content={"message": "Invalid data"})
     
     pdf_file = await construct_pdf(file)
+    full_text = extract_text(pdf_file)
     
-    text_splitter = RecursiveCharacterTextSplitter(separators=["\n\n", "\n"], chunk_size=2000, chunk_overlap=250)
+    documents = get_documents(full_text,separators=["\n\n", "\n","\t"],chunk_size=300,chunk_overlap=75)
     
-    full_text = "\n\n".join([page.extract_text() for page in pdf_file.pages])
-    text_chunks = text_splitter.split_text(full_text)
+    embeddings = create_embeddings(documents)
+    doc_indexes = get_relevant_documents_indexes(embeddings,num_clusters=5)
+    relevant_documents = get_documents_by_index(indices=doc_indexes,docs=documents)
     
+    llm3 = create_llm(task="summarize")
+    summarization_chain= create_map_summarization_chain(llm=llm3,prompt=MAP_PROMPT_EN,input_variables=["text"])
     
+    summaries = summarize_docs(map_chain=summarization_chain,documents=relevant_documents)
     
-    
+    llm4 = create_llm(task="synthesize")
+    result = await synthesis(llm=llm4,prompt=COMBINE_PROMPT_EN,input_variables=["text"],summary_list=summaries)
+    print("---this is the full result---",result)
     response_data = {"message": "File uploaded successfully", "json_data": parameters}
     return JSONResponse(content=jsonable_encoder(response_data))
