@@ -1,5 +1,6 @@
 from typing import Literal
 from services.configuration import get_settings
+import concurrent.futures
 
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import HuggingFaceHub
@@ -7,6 +8,8 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain.prompts import PromptTemplate
 from langchain.schema import Document
 from langchain.schema.language_model import BaseLanguageModel
+from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
+
 
 def create_llm(task: Literal["summarize"] | Literal["synthesis"]):
     settings = get_settings()
@@ -27,7 +30,7 @@ def create_llm(task: Literal["summarize"] | Literal["synthesis"]):
     return llm
 
 
-def create_map_summarization_chain(llm:BaseLanguageModel, prompt: str, input_variables: list[str]):
+def create_map_summarization_chain(llm: BaseLanguageModel, prompt: str, input_variables: list[str]):
     prompt_template = PromptTemplate(
         template=prompt, input_variables=input_variables)
     map_chain = load_summarize_chain(llm=llm,
@@ -36,25 +39,34 @@ def create_map_summarization_chain(llm:BaseLanguageModel, prompt: str, input_var
     return map_chain
 
 
-def summarize_docs(map_chain, documents: list[Document]):
+async def summarize_docs(llm: BaseLanguageModel, prompt: str, input_variables: list[str], documents: list[Document]):
     summary_list = []
-# Loop through a range of the lenght of your selected docs
-    for i, doc in enumerate(documents):
 
-        # Go get a summary of the chunk
-        chunk_summary = map_chain.run([doc])
+    map_chain = create_map_summarization_chain(
+        llm=llm, prompt=prompt, input_variables=input_variables)
 
-        # Append that summary to your list
-        summary_list.append(chunk_summary)
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        future_to_doc = {executor.submit(
+            run_summarization, map_chain, doc): doc for doc in documents}
+
+        for future in concurrent.futures.as_completed(future_to_doc):
+            doc = future_to_doc[future]
+            try:
+                chunk_summary = future.result()
+                summary_list.append(chunk_summary)
+            except Exception as e:
+                print(f"Error processing document: {doc.content}, error: {e}")
 
     return summary_list
 
 
-async def synthesis(llm:BaseLanguageModel, prompt: str, input_variables: list[str], summary_list: list[str]):
-    summaries = "\n".join(summary_list)
-    print("---this are all the summaries---", summaries)
-    summaries_doc = Document(page_content=summaries)
+def run_summarization(map_chain: BaseCombineDocumentsChain, doc: Document):
+    return map_chain.run([doc])
 
+
+async def synthesis(llm: BaseLanguageModel, prompt: str, input_variables: list[str], summary_list: list[str]):
+    summaries = "\n".join(summary_list)
+    summaries_doc = Document(page_content=summaries)
     reduce_chain = create_map_summarization_chain(llm=llm,
                                                   prompt=prompt,
                                                   input_variables=input_variables)
