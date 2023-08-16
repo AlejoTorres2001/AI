@@ -12,64 +12,143 @@ from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
 
 
 def create_llm(task: Literal["summarize"] | Literal["synthesis"]):
-    settings = get_settings()
-    if settings.OPENAI_API_KEY != None:
+    """
+    Creates a language model for the given task. If the OPENAI_API_KEY is set, it will use the OpenAI API, otherwise it will use the HuggingFace Hub.
 
-        llm = ChatOpenAI(temperature=0,
-                         openai_api_key=settings.OPENAI_API_KEY,
-                         max_tokens=1000,
-                         model='gpt-3.5-turbo'
-                         ) if task == "summarize" else ChatOpenAI(temperature=0,
-                                                                  openai_api_key=settings.OPENAI_API_KEY,
-                                                                  max_tokens=3000,
-                                                                  model='gpt-4',
-                                                                  request_timeout=120
-                                                                  )
-    else:
-        llm = HuggingFaceHub(repo_id="tiiuae/falcon-7b-instruct")
-    return llm
+    Parameters
+    - ``task``: The task to create the language model for. Can be either ``summarize`` or ``synthesis``.
+
+    Returns
+    ``llm``: The language model.
+
+    Raises
+    - ``ValueError``: If the task is not ``summarize`` or ``synthesis`` or the OPENAI_API_KEY or the HUGGINGFACEHUB_API_TOKEN are not set.
+    """
+    try:
+        settings = get_settings()
+        if settings.OPENAI_API_KEY != None:
+
+            llm = ChatOpenAI(temperature=0,
+                             openai_api_key=settings.OPENAI_API_KEY,
+                             max_tokens=1000,
+                             model='gpt-3.5-turbo'
+                             ) if task == "summarize" else ChatOpenAI(temperature=0,
+                                                                      openai_api_key=settings.OPENAI_API_KEY,
+                                                                      max_tokens=3000,
+                                                                      model='gpt-4',
+                                                                      request_timeout=120
+                                                                      )
+        else:
+            llm = HuggingFaceHub(repo_id="tiiuae/falcon-7b-instruct")
+        return llm
+    except ValueError as e:
+        raise ValueError(
+            "The task must be either 'summarize' or 'synthesis' and the OPENAI_API_KEY or the HUGGINGFACEHUB_API_TOKEN must be set.")
 
 
 def create_map_summarization_chain(llm: BaseLanguageModel, prompt: str, input_variables: list[str]):
-    prompt_template = PromptTemplate(
-        template=prompt, input_variables=input_variables)
-    map_chain = load_summarize_chain(llm=llm,
-                                     chain_type="stuff",
-                                     prompt=prompt_template)
-    return map_chain
+    """
+    Creates a summarization chain for the given language model, prompt and input variables.
+
+    Parameters 
+
+    - ``llm``: The language model to use.
+    - ``prompt``: The prompt string representation to use.
+    - ``input_variables``: The input variables for the prompt to use.
+
+    Returns 
+
+    ``map_chain``: The summarization chain.
+
+    Raises
+
+    - ``Exception``: If the chain could not be created.
+    """
+    try:
+        prompt_template = PromptTemplate(
+            template=prompt, input_variables=input_variables)
+        map_chain = load_summarize_chain(llm=llm,
+                                         chain_type="stuff",
+                                         prompt=prompt_template)
+        return map_chain
+    except Exception as e:
+        raise Exception("Could not create summarization chain.")
 
 
 async def summarize_docs(llm: BaseLanguageModel, prompt: str, input_variables: list[str], documents: list[Document]):
-    summary_list = []
+    """
+    Summarizes the given documents independently using the given language model, prompt and input variables.
 
-    map_chain = create_map_summarization_chain(
-        llm=llm, prompt=prompt, input_variables=input_variables)
+    Parameters
+    - ``llm``: The language model to use.
+    - ``prompt``: The prompt string representation to use must be aimed to summarize.
+    - ``input_variables``: The input variables for the prompt to use.
+    - ``documents``: The documents to summarize.
 
-    with concurrent.futures.ProcessPoolExecutor() as executor:
-        future_to_doc = {executor.submit(
-            run_summarization, map_chain, doc): doc for doc in documents}
+    Returns
+    ``summary_list``: The list of summaries.
 
-        for future in concurrent.futures.as_completed(future_to_doc):
-            doc = future_to_doc[future]
-            try:
-                chunk_summary = future.result()
-                summary_list.append(chunk_summary)
-            except Exception as e:
-                print(f"Error processing document: {doc.content}, error: {e}")
+    Raises
+    - ``Exception``: If the any of the chain instances fails.
+    """
+    try:
+        summary_list = []
 
-    return summary_list
+        map_chain = create_map_summarization_chain(
+            llm=llm, prompt=prompt, input_variables=input_variables)
+
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            future_to_doc = {executor.submit(
+                run_summarization, map_chain, doc): doc for doc in documents}
+
+            for future in concurrent.futures.as_completed(future_to_doc):
+                doc = future_to_doc[future]
+                try:
+                    chunk_summary = future.result()
+                    summary_list.append(chunk_summary)
+                except Exception as e:
+                    print(
+                        f"Error processing document: {doc.content}, error: {e}")
+
+        return summary_list
+    except Exception as e:
+        raise Exception("Could not summarize documents.")
 
 
 def run_summarization(map_chain: BaseCombineDocumentsChain, doc: Document):
+    """
+    Runs the summarization chain for the given document.
+
+    Parameters
+
+    - ``map_chain``: The summarization chain to use.
+    - ``doc``: The document to summarize."""
     return map_chain.run([doc])
 
 
 async def synthesis(llm: BaseLanguageModel, prompt: str, input_variables: list[str], summary_list: list[str]):
-    summaries = "\n".join(summary_list)
-    summaries_doc = Document(page_content=summaries)
-    reduce_chain = create_map_summarization_chain(llm=llm,
-                                                  prompt=prompt,
-                                                  input_variables=input_variables)
+    """
+    Synthesizes the given summaries using the given language model, prompt and input variables.
 
-    output = await reduce_chain.arun([summaries_doc])
-    return output
+    Parameters
+    - ``llm``: The language model to use.
+    - ``prompt``: The prompt string representation to use must be aimed to synthesize.Must be aimed to synthesize.
+    - ``input_variables``: The input variables for the prompt to use.
+    - ``summary_list``: The summaries to synthesize.
+
+    Returns
+    ``output``: The output of the synthesis in plain text.
+
+    Raises
+    - ``Exception``: If the chain instance fails."""
+    try:
+        summaries = "\n".join(summary_list)
+        summaries_doc = Document(page_content=summaries)
+        reduce_chain = create_map_summarization_chain(llm=llm,
+                                                      prompt=prompt,
+                                                      input_variables=input_variables)
+
+        output = await reduce_chain.arun([summaries_doc])
+        return output
+    except Exception as e:
+        raise Exception("Could not synthesize summaries.")

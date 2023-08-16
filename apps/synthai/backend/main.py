@@ -12,20 +12,19 @@ from services.inference import create_llm, summarize_docs, synthesis
 app = FastAPI()
 
 origins = [
-    "*"
+    "http://localhost:5173",
 ]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET,OPTIONS,POST"],
     allow_headers=["*"]
 )
 
 #! configurar cors antes de abiente pre-productivo y apikey
 #! validar a mano los parametros del json serializado -> files + json models no no se quieren juntos
 #! Arquitectura hexagonal para los servicios
-#!Documentar funciones
 
 
 @app.post("/summarize")
