@@ -1,15 +1,10 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-import axios from 'axios';
-interface JsonResponse {
-  message: string;
-  json_data: Record<string, any>;
-}
+import { summarize } from './services/summarize';
+
 function App() {
   const [file, setFile] = useState<File | null>(null);
-  const [jsonData, setJsonData] = useState<Record<string, any>>({});
+  const [parameters, setParamaters] = useState<Record<string, any>>({});
   const [message, setMessage] = useState<string>('');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,7 +15,7 @@ function App() {
 
   const handleJsonChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setJsonData(prevData => ({
+    setParamaters(prevData => ({
       ...prevData,
       [name]: value
     }));
@@ -28,35 +23,15 @@ function App() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const formData = new FormData();
-    formData.append('file', file as File);
-    formData.append('data', JSON.stringify({ json_data: jsonData }));
-
-    try {
-      const response = await axios.post<JsonResponse>('http://localhost:8000/summarize', formData, {
-         headers: {
-           'Content-Type': 'multipart/form-data',
-         },
-      });
-      setMessage(response.data.message);
-      console.log(response.data);
-    } catch (error) {
-      console.error('Error uploading file:', error);
-    }
+      const data = await summarize(file as File, parameters);
+      setMessage(data.message);
+      if (data.ok) {
+        console.log("this is the summary",data.summary)
+      }
   };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
       <div className="card">
       <h1>Upload File and JSON Data</h1>
       <form onSubmit={handleSubmit}>
