@@ -28,35 +28,37 @@ app.add_middleware(
 
 
 @app.post("/summarize")
-async def upload_file(file: UploadFile = File(...), data: str = Form(...)):
+async def upload_file(file: UploadFile = File(...), parameters: str = Form(...)):
     ###! ---- Schema validations ---- ###
+    try:
+        parameters = parse_json(parameters)
 
-    parameters = parse_json(data)
+        if not is_valid_schema(parameters):
+            return JSONResponse(content={"message": "Invalid data"})
+        ###! ---- Data Parsing ---- ###
 
-    if not is_valid_schema(parameters):
-        return JSONResponse(content={"message": "Invalid data"})
-    ###! ---- Data Parsing ---- ###
+        pdf_file = await construct_pdf(file)
+        full_text = extract_text(pdf_file)
 
-    pdf_file = await construct_pdf(file)
-    full_text = extract_text(pdf_file)
+        documents = get_documents(full_text, separators=[
+                                "\n\n", "\n", "\t"], chunk_size=300, chunk_overlap=75)
 
-    documents = get_documents(full_text, separators=[
-                              "\n\n", "\n", "\t"], chunk_size=300, chunk_overlap=75)
+        embeddings = create_embeddings(documents)
+        doc_indexes = get_relevant_documents_indexes(embeddings, num_clusters=5)
+        relevant_documents = get_documents_by_index(
+            indexes=doc_indexes, docs=documents)
 
-    embeddings = create_embeddings(documents)
-    doc_indexes = get_relevant_documents_indexes(embeddings, num_clusters=5)
-    relevant_documents = get_documents_by_index(
-        indexes=doc_indexes, docs=documents)
+        ###! ---- Inference ---- ###
 
-    ###! ---- Inference ---- ###
+        llm3 = create_llm(task="summarize")
+        summaries = await summarize_docs(llm=llm3, prompt=MAP_PROMPT_EN, input_variables=["text"], documents=relevant_documents)
 
-    llm3 = create_llm(task="summarize")
-    summaries = await summarize_docs(llm=llm3, prompt=MAP_PROMPT_EN, input_variables=["text"], documents=relevant_documents)
+        llm4 = create_llm(task="synthesize")
+        result = await synthesis(llm=llm4, prompt=COMBINE_PROMPT_EN, input_variables=["text"], summary_list=summaries)
 
-    llm4 = create_llm(task="synthesize")
-    result = await synthesis(llm=llm4, prompt=COMBINE_PROMPT_EN, input_variables=["text"], summary_list=summaries)
-
-    ###! ---- Response ---- ###
-    response_data = {"message": "File uploaded successfully",
-                     "json_data": result}
-    return JSONResponse(content=jsonable_encoder(response_data))
+        ###! ---- Response ---- ###
+        response_data = {"message": "File uploaded successfully",
+                        "summary": result}
+        return JSONResponse(content=jsonable_encoder(response_data))
+    except Exception as e:
+        return JSONResponse(content=jsonable_encoder({"message": f"{e}","summary":"{}"}), status_code=500)
