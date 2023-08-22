@@ -1,0 +1,11 @@
+cloudpickle==2.2.1
+gymnasium==0.27.1
+gymnasium-notices==0.0.1
+jax-jumpy==0.2.0
+numpy==1.24.2
+pygame==2.3.0
+typing_extensions==4.5.0
+autopep8==2.0.2
+tomli==2.0.1
+typing_extensions==4.5.0
+pycodestyle==2.10.0
