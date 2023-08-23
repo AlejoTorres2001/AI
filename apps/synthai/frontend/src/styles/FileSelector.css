@@ -1,0 +1,57 @@
+/* styles.css */
+.file-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 20px 0;
+  gap: 10px;
+}
+
+.custom-file-input {
+  background-color: #40414F;
+  border: 1px solid #555869;
+  border-radius: 5px;
+  padding: 10px;
+  width: 90%;
+  min-height: 130px;
+  color: #C5C5D2;
+  display: flex;
+  flex-direction: column;
+}
+
+.file-name{
+  color: #C5C5D2;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  margin: 10px 0;
+}
+/* Hide default file input */
+::file-selector-button {
+  display: none;
+}
+
+/* Style the "Choose a file" button */
+.custom-file-input::before {
+  content: 'Choose your PDF';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #18C37D;
+  color: #FFFFFF;
+  border-radius: 5px;
+  padding: 8px 15px;
+  cursor: pointer;
+}
+
+/* Adjust button size on smaller screens */
+@media screen and (max-width: 480px) {
+  .custom-file-input::before {
+    padding: 6px 12px;
+  }
+}
+input[type=file] {
+  color: transparent !important;
+}
