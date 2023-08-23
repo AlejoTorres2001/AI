@@ -1,7 +1,8 @@
 import api from "../api/client";
+import { Parameters } from "../models/parameters";
 import SummaryAxiosResponse from "../models/summary-response";
 
-export async function summarize(file: File, parameters: Record<string, any>) {
+export async function summarize(file: File, parameters: Parameters) {
   try {
     const formData = new FormData();
     formData.append("file", file);
