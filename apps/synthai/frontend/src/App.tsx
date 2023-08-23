@@ -4,6 +4,8 @@ import { summarize } from "./services/summarize";
 import FileSelector from "./components/FileSelector";
 import { Parameters, defaultParameters } from "./models/parameters";
 import ParametersCustomizer from "./components/ParametersCustomizer";
+import Parameter from "./components/Parameter";
+import UploadButton from "./components/UploadButton";
 
 function App() {
   const [file, setFile] = useState<File | null>(null);
@@ -21,7 +23,9 @@ function App() {
     }
   };
 
-  const handleJsonChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleParametersChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setParamaters((prevData) => ({
       ...prevData,
@@ -29,7 +33,7 @@ function App() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     const data = await summarize(file as File, parameters);
     setMessage(data.message);
@@ -45,14 +49,58 @@ function App() {
           handleFileChange={handleFileChange}
           selectedFileName={selectedFileName}
         />
-        <ParametersCustomizer parameters={parameters} setParameters={setParamaters}>
-        <h3>Parametro1</h3>
-        <h3>Parametro2</h3>
-        <h3>Parametro3</h3>
+        <ParametersCustomizer handleParametersChange={handleParametersChange}>
+          <Parameter
+            name="max_sequence_length"
+            type="number"
+            description="Max Sentences"
+            value={parameters.max_sequence_length}
+          />
+          <Parameter
+            name="temperature"
+            type="range"
+            description="Temperature"
+            value={parameters.temperature}
+          />
+          <Parameter
+            name="top_k"
+            type="range"
+            description="Top K"
+            value={parameters.top_k}
+          />
+          <Parameter
+            name="top_p"
+            type="range"
+            description="Top P"
+            value={parameters.top_p}
+          />
+          <Parameter
+            name="clusters_number"
+            type="number"
+            description="clusters number"
+            value={parameters.clusters_number}
+          />
+          <Parameter
+            name="language"
+            type="list"
+            description="language"
+            value={parameters.language}
+            options={["EN", "SP"]}
+          />
+          <Parameter
+            name="chunk_size"
+            type="number"
+            description="chunk size"
+            value={parameters.chunk_size}
+          />
+          <Parameter
+            name="chunk_overlap"
+            type="number"
+            description="chunk overlap"
+            value={parameters.chunk_overlap}
+          />
         </ParametersCustomizer>
-        <button type="submit" onClick={handleSubmit}>
-          Upload
-        </button>
+        <UploadButton handleSubmit={handleSubmit} />
       </div>
       {message && <p>{message}</p>}
     </div>
