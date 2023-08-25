@@ -26,10 +26,10 @@ function App() {
   const handleParametersChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     setParamaters((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: type === "number" || type === "range" ? Number(value) : value,
     }));
   };
 
