@@ -34,17 +34,18 @@ async def upload_file(file: UploadFile = File(...), parameters: str = Form(...))
         parameters = parse_json(parameters)
 
         if not is_valid_schema(parameters):
-            return JSONResponse(content={"message": "Invalid data"})
+            raise Exception("Invalid parameters")
         ###! ---- Data Parsing ---- ###
 
         pdf_file = await construct_pdf(file)
         full_text = extract_text(pdf_file)
 
         documents = get_documents(full_text, separators=[
-                                "\n\n", "\n", "\t"], chunk_size=300, chunk_overlap=75)
+            "\n\n", "\n", "\t"], chunk_size=300, chunk_overlap=75)
 
         embeddings = create_embeddings(documents)
-        doc_indexes = get_relevant_documents_indexes(embeddings, num_clusters=5)
+        doc_indexes = get_relevant_documents_indexes(
+            embeddings, num_clusters=5)
         relevant_documents = get_documents_by_index(
             indexes=doc_indexes, docs=documents)
 
@@ -58,7 +59,7 @@ async def upload_file(file: UploadFile = File(...), parameters: str = Form(...))
 
         ###! ---- Response ---- ###
         response_data = {"message": "File uploaded successfully",
-                        "summary": result}
+                         "summary": result}
         return JSONResponse(content=jsonable_encoder(response_data))
     except Exception as e:
-        return JSONResponse(content=jsonable_encoder({"message": f"{e}","summary":"{}"}), status_code=500)
+        return JSONResponse(content=jsonable_encoder({"message": f"{e}", "summary": "{}"}), status_code=500)
