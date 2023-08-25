@@ -1,0 +1,12 @@
+.parameters-section{
+    margin: 20px 0;
+    padding: 20px;
+    border: 1px solid #555869;
+    border-radius: 5px;
+    background-color: #40414F;
+    color: #ededef;
+    min-height: 130px;
+    width: 90%;
+    box-shadow: 10px 4px 6px rgba(0, 0, 0, 0.1);
+
+}
