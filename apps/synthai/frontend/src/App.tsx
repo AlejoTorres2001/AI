@@ -85,7 +85,7 @@ function App() {
             type="list"
             description="language"
             value={parameters.language}
-            options={["EN", "SP"]}
+            options={[{value:"EN",label:"EN"},{value:"SP",label:"SP"}]}
           />
           <Parameter
             name="chunk_size"
