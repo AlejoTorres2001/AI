@@ -1,4 +1,5 @@
 import React, { ChangeEvent, ReactElement } from "react";
+import "../styles/ParametersCustomizer.css";
 interface ParametersCustomizerProps {
   handleParametersChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -26,10 +27,12 @@ function ParametersCustomizer({
   });
 
   return (
-    <div>
-      <h2>Parameters</h2>
-      {childrenWithProps}
-    </div>
+    <section className="parameters-section">
+      <div className="parameters-container">
+        <h2>Customize Parameters</h2>
+        {childrenWithProps}
+      </div>
+    </section>
   );
 }
 
