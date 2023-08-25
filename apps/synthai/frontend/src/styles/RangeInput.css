@@ -1,0 +1,31 @@
+.range-input {
+  min-width: 180px;
+  height: 10px;
+  appearance: none;
+  background: linear-gradient(to right, #19c37d, #00a67d);
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+.range-input-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+.range-input::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #ededef;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+}
+
+.range-value {
+  font-size: 1.1rem;
+  position: absolute; /* Use absolute positioning */
+  top: -25px;
+}
