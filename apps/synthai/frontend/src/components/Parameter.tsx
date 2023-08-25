@@ -1,20 +1,46 @@
+import NumberInput from "./NumberInput";
+import RangeInput from "./RangeInput";
+import "../styles/Parameter.css";
+import SelectInput from "./SelectInput";
 interface ParameterProps {
   name: string;
   type: "text" | "number" | "checkbox" | "range" | "list";
   description: string;
   value: string | number | boolean;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  options?: string[];
+  onChange?: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => void;
+  options?: { value: string; label: string }[];
 }
-function Parameter({ name, type, description, value,onChange,options }: ParameterProps) {
+function Parameter({
+  name,
+  type,
+  description,
+  value,
+  onChange,
+  options,
+}: ParameterProps) {
   return (
-    <div>
-      <label htmlFor={name}>{description}</label>
+    <div className="parameter-container">
+      <label className="input-label" htmlFor={name}>
+        {description}
+      </label>
       {type === "text" && (
-        <input type="text" name={name} id={name} value={value as string} onChange={onChange} />
+        <input
+          type="text"
+          name={name}
+          id={name}
+          value={value as string}
+          onChange={onChange}
+        />
       )}
       {type === "number" && (
-        <input type="number" name={name} id={name} value={value as number} onChange={onChange} />
+        <NumberInput
+          name={name}
+          id={name}
+          value={value as number}
+          onChange={onChange}
+        />
       )}
       {type === "checkbox" && (
         <input
@@ -24,25 +50,21 @@ function Parameter({ name, type, description, value,onChange,options }: Paramete
           checked={value as boolean}
           onChange={onChange}
           name={name}
-          />
+        />
       )}
       {type === "range" && (
-        <input
-          type="range"
+        <RangeInput
           id={name}
           name={name}
           value={value as number}
           onChange={onChange}
+          min={0}
+          max={1}
+          step={0.01}
         />
       )}
       {type === "list" && (
-        <select name={name} id={name} onChange={onChange}>
-          {options?.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
+        <SelectInput options={options as { value: string; label: string }[]} value={value as string} id={name} name={name} onChange={onChange} />
       )}
     </div>
   );
