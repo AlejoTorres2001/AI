@@ -6,6 +6,7 @@
 .grid{
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  align-items:start;
 }
 
 
@@ -16,5 +17,6 @@
     display: flex;
     flex-direction: column;
     height: 100vh; /* Occupies the entire viewport height */
+    align-items: center; /* Optional */
   }
 }
