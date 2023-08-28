@@ -6,14 +6,35 @@ import { Parameters, defaultParameters } from "./models/parameters";
 import ParametersCustomizer from "./components/ParametersCustomizer";
 import Parameter from "./components/Parameter";
 import UploadButton from "./components/UploadButton";
+import QuestionButton from "./components/QuestionButton";
+import Modal from "./components/Modal";
+import Spinner from "./components/Spinner";
 
 function App() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedFileName, setSelectedFileName] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [parameters, setParameters] = useState<Parameters>(defaultParameters);
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-  const [parameters, setParamaters] = useState<Parameters>(defaultParameters);
-
-  const [message, setMessage] = useState<string>("");
+  const handleSubmit = async (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      if (file === null) return;
+      const data = await summarize(file, parameters);
+      setMessage(data.message);
+      if (data.ok) {
+        //Success logic
+        console.log("this is the summary", data.summary);
+      }
+    } catch (error) {
+      console.error("Error occurred:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -27,29 +48,33 @@ function App() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
-    setParamaters((prevData) => ({
+    setParameters((prevData) => ({
       ...prevData,
       [name]: type === "number" || type === "range" ? Number(value) : value,
     }));
   };
 
-  const handleSubmit = async (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault();
-    const data = await summarize(file as File, parameters);
-    setMessage(data.message);
-    if (data.ok) {
-      console.log("this is the summary", data.summary);
-    }
+  const openModal = () => {
+    setIsModalOpen(true);
   };
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
   return (
     <div className="main">
+      <QuestionButton onClick={openModal} />
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        text="This is some modal text."
+      />
       <div className="grid">
         <FileSelector
           handleFileChange={handleFileChange}
           selectedFileName={selectedFileName}
         />
-        
+
         <ParametersCustomizer handleParametersChange={handleParametersChange}>
           <Parameter
             name="max_sequence_length"
@@ -86,7 +111,10 @@ function App() {
             type="list"
             description="language"
             value={parameters.language}
-            options={[{value:"EN",label:"EN"},{value:"SP",label:"SP"}]}
+            options={[
+              { value: "EN", label: "EN" },
+              { value: "SP", label: "SP" },
+            ]}
           />
           <Parameter
             name="chunk_size"
@@ -103,6 +131,7 @@ function App() {
         </ParametersCustomizer>
         <UploadButton handleSubmit={handleSubmit} />
       </div>
+      {isLoading && <Spinner />}
       {message && <p>{message}</p>}
     </div>
   );
