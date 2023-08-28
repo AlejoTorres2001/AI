@@ -28,8 +28,8 @@ function ParametersCustomizer({
 
   return (
     <section className="parameters-section">
-      <div className="parameters-container">
         <h2>Customize Parameters</h2>
+      <div className="parameters-container">
         {childrenWithProps}
       </div>
     </section>

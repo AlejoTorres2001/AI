@@ -49,11 +49,12 @@ function App() {
           handleFileChange={handleFileChange}
           selectedFileName={selectedFileName}
         />
+        
         <ParametersCustomizer handleParametersChange={handleParametersChange}>
           <Parameter
             name="max_sequence_length"
             type="number"
-            description="Max Sentences"
+            description="Max Tokens"
             value={parameters.max_sequence_length}
           />
           <Parameter

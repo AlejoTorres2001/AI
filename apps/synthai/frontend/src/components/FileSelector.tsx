@@ -5,7 +5,10 @@ interface FileSelectorProps {
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   selectedFileName: string;
 }
-function FileSelector({ handleFileChange, selectedFileName }: FileSelectorProps) {
+function FileSelector({
+  handleFileChange,
+  selectedFileName,
+}: FileSelectorProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const handleChooseFile = () => {
     if (fileInputRef.current) {
@@ -14,14 +17,19 @@ function FileSelector({ handleFileChange, selectedFileName }: FileSelectorProps)
   };
   return (
     <div className="file-input-container">
+      <div className="number-container"></div>
       <div className="custom-file-input" onClick={handleChooseFile}>
-        {selectedFileName && (<span className="file-name">Succesfully loaded file: {selectedFileName}</span>)}
+        {selectedFileName && (
+          <span className="file-name">
+            Succesfully loaded file: {selectedFileName}
+          </span>
+        )}
         <input
           ref={fileInputRef}
           type="file"
           accept=".pdf"
           onChange={handleFileChange}
-          />
+        />
       </div>
     </div>
   );

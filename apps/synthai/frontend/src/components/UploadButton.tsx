@@ -1,12 +1,12 @@
-import React from "react";
+import "../styles/UploadButton.css";
 interface uploadButtonProps {
   handleSubmit: (e: React.MouseEvent<HTMLElement>) => void;
 }
 function UploadButton({ handleSubmit }: uploadButtonProps) {
   return (
-    <div>
-      <button onClick={handleSubmit}>
-        Upload
+    <div className="button-container">
+      <button onClick={handleSubmit} className="upload-button">
+        Summarize Document 
       </button>
     </div>
   );
