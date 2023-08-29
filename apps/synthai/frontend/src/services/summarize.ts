@@ -18,7 +18,6 @@ export async function summarize(file: File, parameters: Parameters) {
       ok: true,
     };
   } catch (error: any) {
-    console.log("Este es el error", error);
     return {
       ok: false,
       message: error.response.data.message,

@@ -4,11 +4,9 @@ interface uploadButtonProps {
 }
 function UploadButton({ handleSubmit }: uploadButtonProps) {
   return (
-    <div className="button-container">
-      <button onClick={handleSubmit} className="upload-button">
-        Summarize Document 
-      </button>
-    </div>
+    <button onClick={handleSubmit} className="upload-button">
+      Summarize Document
+    </button>
   );
 }
 

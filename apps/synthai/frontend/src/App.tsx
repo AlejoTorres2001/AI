@@ -9,15 +9,16 @@ import UploadButton from "./components/UploadButton";
 import QuestionButton from "./components/QuestionButton";
 import Modal from "./components/Modal";
 import Spinner from "./components/Spinner";
-
+import PDFDownload from "./components/PDFDownload";
 function App() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedFileName, setSelectedFileName] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [parameters, setParameters] = useState<Parameters>(defaultParameters);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
+  const [message, setMessage] = useState("");
+  const [summary, setSummary] = useState("");
   const handleSubmit = async (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -26,8 +27,7 @@ function App() {
       const data = await summarize(file, parameters);
       setMessage(data.message);
       if (data.ok) {
-        //Success logic
-        console.log("this is the summary", data.summary);
+        setSummary(data.summary);
       }
     } catch (error) {
       console.error("Error occurred:", error);
@@ -61,6 +61,7 @@ function App() {
   const closeModal = () => {
     setIsModalOpen(false);
   };
+
   return (
     <div className="main">
       <QuestionButton onClick={openModal} />
@@ -129,10 +130,19 @@ function App() {
             value={parameters.chunk_overlap}
           />
         </ParametersCustomizer>
-        <UploadButton handleSubmit={handleSubmit} />
+        <div className="button-container">
+          <UploadButton handleSubmit={handleSubmit} />
+          {summary && (
+            <PDFDownload
+              summary={summary}
+              selectedFileName={selectedFileName}
+            />
+          )}
+        </div>
       </div>
       {isLoading && <Spinner />}
       {message && <p>{message}</p>}
+      <div></div>
     </div>
   );
 }
