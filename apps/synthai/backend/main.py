@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from prompts import MAP_PROMPT_EN, COMBINE_PROMPT_EN
 
-from services.parsers import construct_pdf, parse_json, is_valid_schema, extract_text, get_documents
+from services.parsers import construct_pdf, parse_json, validate_schema, extract_text, get_documents
 from services.data import create_embeddings, get_relevant_documents_indexes, get_documents_by_index
 from services.inference import create_llm, summarize_docs, synthesis
 
@@ -24,29 +24,24 @@ app.add_middleware(
 )
 
 #! configurar cors antes de abiente pre-productivo y apikey
-#! validar a mano los parametros del json serializado -> files + json models no no se quieren juntos
-#! Arquitectura hexagonal para los servicios
 
 
 @app.post("/summarize", description="Summarize a pdf file", summary="Summarize the text content of a document in PDF format using LLMs and clustering", tags=["Summarize"], response_model=SuccessResponse, response_description="returns a JSON object containing the summary of the document and a message indicating information about the status of the request")
 async def upload_file(file: UploadFile = File(..., description="a document in PDF format containing the text to be summarized"), parameters: str = Form(..., description="a JSON object containing the parameters for the summarization process, must be serialized into a string")):
     ###! ---- Schema validations ---- ###
     try:
-        parameters = parse_json(parameters)
-
-        if not is_valid_schema(parameters):
-            raise Exception("Invalid parameters")
+        parsed_json = parse_json(parameters)
+        model_parameters = validate_schema(parsed_json)
         ###! ---- Data Parsing ---- ###
-
         pdf_file = await construct_pdf(file)
         full_text = extract_text(pdf_file)
 
         documents = get_documents(full_text, separators=[
-            "\n\n", "\n", "\t"], chunk_size=300, chunk_overlap=75)
+            "\n\n", "\n", "\t"], chunk_size=model_parameters.chunk_size, chunk_overlap=model_parameters.chunk_overlap)
 
         embeddings = create_embeddings(documents)
         doc_indexes = get_relevant_documents_indexes(
-            embeddings, num_clusters=5)
+            embeddings, num_clusters=model_parameters.clusters_number)
         relevant_documents = get_documents_by_index(
             indexes=doc_indexes, docs=documents)
 

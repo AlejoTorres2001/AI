@@ -1,11 +1,11 @@
 from fastapi import UploadFile
 from PyPDF2 import PdfReader
 import io
-from fastapi.encoders import jsonable_encoder
+from json import loads
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 
-
+from models.parametersModel import Parameters
 async def construct_pdf(file: UploadFile, strict: bool = False, password: str = None) -> PdfReader:
     """Creates a ``PdfReader`` object from a ``UploadFile`` object.
     
@@ -49,14 +49,35 @@ def parse_json(string: str) -> dict:
     ``Exception`` if an error occurs while parsing the json string.
     """
     try:
-        return jsonable_encoder(string)
+        return loads(string)
     except Exception as e:
         raise e.add_notes("Error while parsing json string")
 
 
-def is_valid_schema(json_data: dict) -> bool:
-    # TODO: define parameters and validation rules
-    return True
+
+
+
+def validate_schema(json_data: dict) -> Parameters:
+    """validates a dictionary against the ``Parameters`` Pydantic model.
+    
+    Parameters:
+    
+    - ``json_data``: a python dictionary containing the parameters.
+    
+    Returns
+    
+    a Pydantic ``Parameter``model containing the LLMs parameters
+    
+    Raises:
+    
+    ``Exception`` if an error occurs while validating the dictionary.
+    """
+    try:
+        parsed_parameters = Parameters(**json_data)
+        return parsed_parameters
+    except Exception as e:
+        raise e.add_notes("Error while validating parameters")
+
 
 
 def extract_text(pdf_file: PdfReader,start:int=0,finish:int=-1) -> str:
