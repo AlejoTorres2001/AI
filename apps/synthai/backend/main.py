@@ -9,6 +9,7 @@ from services.parsers import construct_pdf, parse_json, is_valid_schema, extract
 from services.data import create_embeddings, get_relevant_documents_indexes, get_documents_by_index
 from services.inference import create_llm, summarize_docs, synthesis
 
+from models.responseModels import SuccessResponse
 app = FastAPI()
 
 origins = [
@@ -27,8 +28,8 @@ app.add_middleware(
 #! Arquitectura hexagonal para los servicios
 
 
-@app.post("/summarize")
-async def upload_file(file: UploadFile = File(...), parameters: str = Form(...)):
+@app.post("/summarize", description="Summarize a pdf file", summary="Summarize the text content of a document in PDF format using LLMs and clustering", tags=["Summarize"], response_model=SuccessResponse, response_description="returns a JSON object containing the summary of the document and a message indicating information about the status of the request")
+async def upload_file(file: UploadFile = File(..., description="a document in PDF format containing the text to be summarized"), parameters: str = Form(..., description="a JSON object containing the parameters for the summarization process, must be serialized into a string")):
     ###! ---- Schema validations ---- ###
     try:
         parameters = parse_json(parameters)
