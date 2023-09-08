@@ -8,3 +8,10 @@
 }
 .input-label {
 }
+
+
+@media (max-width: 412px) {
+  .parameter-container {
+    margin-bottom: 10px;
+  }
+}

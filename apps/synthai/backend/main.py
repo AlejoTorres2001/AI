@@ -32,9 +32,10 @@ async def upload_file(file: UploadFile = File(..., description="a document in PD
     try:
         parsed_json = parse_json(parameters)
         model_parameters = validate_schema(parsed_json)
+        print(model_parameters)
         ###! ---- Data Parsing ---- ###
         pdf_file = await construct_pdf(file)
-        full_text = extract_text(pdf_file)
+        full_text = extract_text(pdf_file,start=model_parameters.from_page, finish =model_parameters.to_page)
 
         documents = get_documents(full_text, separators=[
             "\n\n", "\n", "\t"], chunk_size=model_parameters.chunk_size, chunk_overlap=model_parameters.chunk_overlap)

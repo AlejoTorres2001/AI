@@ -7,6 +7,8 @@ export interface Parameters {
   clusters_number: number;
   chunk_size: number;
   chunk_overlap: number;
+  from_page: number;
+  to_page: number;
 }
 export const defaultParameters: Parameters = {
   language: "EN",
@@ -17,4 +19,6 @@ export const defaultParameters: Parameters = {
   clusters_number: 5,
   chunk_size: 500,
   chunk_overlap: 50,
+  from_page: 0,
+  to_page: -1,
 };

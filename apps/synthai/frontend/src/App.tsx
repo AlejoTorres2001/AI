@@ -48,6 +48,7 @@ function App() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
+    console.log(name, value, type);
     setParameters((prevData) => ({
       ...prevData,
       [name]: type === "number" || type === "range" ? Number(value) : value,
@@ -129,6 +130,16 @@ function App() {
             description="chunk overlap"
             value={parameters.chunk_overlap}
           />
+          <Parameter
+          name="from_page"
+          type="number"
+          description="from page"
+          value={parameters.from_page}/>
+          <Parameter
+          name="to_page"
+          type="number"
+          description="to page"
+          value={parameters.to_page}/>
         </ParametersCustomizer>
         <div className="button-container">
           <UploadButton handleSubmit={handleSubmit} />

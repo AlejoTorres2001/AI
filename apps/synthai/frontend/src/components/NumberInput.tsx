@@ -11,7 +11,7 @@ const NumberInput = ({ value, onChange,name,...rest }: NumberInputProps) => {
       <input
         type="number"
         value={value}
-        name="name"
+        name={name}
         onChange={onChange}
         className="number-input"
         {...rest}
