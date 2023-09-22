@@ -32,10 +32,10 @@ async def upload_file(file: UploadFile = File(..., description="a document in PD
     try:
         parsed_json = parse_json(parameters)
         model_parameters = validate_schema(parsed_json)
-        print(model_parameters)
-        ###! ---- Data Parsing ---- ###
+        ###! ---- Data Pipeline ---- ###
         pdf_file = await construct_pdf(file)
-        full_text = extract_text(pdf_file,start=model_parameters.from_page, finish =model_parameters.to_page)
+        full_text = extract_text(
+            pdf_file, start=model_parameters.from_page, finish=model_parameters.to_page)
 
         documents = get_documents(full_text, separators=[
             "\n\n", "\n", "\t"], chunk_size=model_parameters.chunk_size, chunk_overlap=model_parameters.chunk_overlap)
@@ -55,7 +55,7 @@ async def upload_file(file: UploadFile = File(..., description="a document in PD
         result = await synthesis(llm=llm4, prompt=COMBINE_PROMPT_EN, input_variables=["text"], summary_list=summaries)
 
         ###! ---- Response ---- ###
-        response_data = {"message": "File uploaded successfully",
+        response_data = {"message": "File summarized correctly",
                          "summary": result}
         return JSONResponse(content=jsonable_encoder(response_data))
     except Exception as e:

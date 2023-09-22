@@ -10,6 +10,10 @@ import QuestionButton from "./components/QuestionButton";
 import Modal from "./components/Modal";
 import Spinner from "./components/Spinner";
 import PDFDownload from "./components/PDFDownload";
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 function App() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedFileName, setSelectedFileName] = useState("");
@@ -17,7 +21,6 @@ function App() {
   const [parameters, setParameters] = useState<Parameters>(defaultParameters);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [message, setMessage] = useState("");
   const [summary, setSummary] = useState("");
   const handleSubmit = async (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
@@ -25,12 +28,14 @@ function App() {
     try {
       if (file === null) return;
       const data = await summarize(file, parameters);
-      setMessage(data.message);
-      if (data.ok) {
-        setSummary(data.summary);
+      if (!data.ok) {
+        toast.error(data.message);
+        return;
       }
+      setSummary(data.summary);
+      toast.success(data.message);
     } catch (error) {
-      console.error("Error occurred:", error);
+      toast.error(`Error generating summary`);
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +53,6 @@ function App() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
-    console.log(name, value, type);
     setParameters((prevData) => ({
       ...prevData,
       [name]: type === "number" || type === "range" ? Number(value) : value,
@@ -131,15 +135,17 @@ function App() {
             value={parameters.chunk_overlap}
           />
           <Parameter
-          name="from_page"
-          type="number"
-          description="from page"
-          value={parameters.from_page}/>
+            name="from_page"
+            type="number"
+            description="from page"
+            value={parameters.from_page}
+          />
           <Parameter
-          name="to_page"
-          type="number"
-          description="to page"
-          value={parameters.to_page}/>
+            name="to_page"
+            type="number"
+            description="to page"
+            value={parameters.to_page}
+          />
         </ParametersCustomizer>
         <div className="button-container">
           <UploadButton handleSubmit={handleSubmit} />
@@ -152,8 +158,7 @@ function App() {
         </div>
       </div>
       {isLoading && <Spinner />}
-      {message && <p>{message}</p>}
-      <div></div>
+      <ToastContainer closeOnClick theme="dark" />
     </div>
   );
 }
