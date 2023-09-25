@@ -1,18 +1,16 @@
-.main{
+.main {
   width: 100vw;
   height: 100vh;
   background-color: #343541;
 }
-.grid{
+.grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  align-items:start;
+  align-items: start;
 }
 
-
-
-
-@media (max-width: 768px) { /* Adjust the breakpoint as needed */
+@media (max-width: 768px) {
+  /* Adjust the breakpoint as needed */
   .grid {
     display: flex;
     flex-direction: column;
