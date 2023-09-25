@@ -4,10 +4,10 @@ import '../styles/Modal.css';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  text: string;
+  children: React.ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, text }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
   
 
   if (!isOpen) return null;
@@ -15,7 +15,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, text }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal">
-        <p>{text}</p>
+       {children}
       </div>
     </div>
   );

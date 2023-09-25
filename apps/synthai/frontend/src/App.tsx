@@ -26,7 +26,10 @@ function App() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      if (file === null) return;
+      if (file === null) {
+        toast.error(`Please select a file`);
+        return;
+      }
       const data = await summarize(file, parameters);
       if (!data.ok) {
         toast.error(data.message);
@@ -70,11 +73,11 @@ function App() {
   return (
     <div className="main">
       <QuestionButton onClick={openModal} />
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        text="This is some modal text."
-      />
+      <Modal isOpen={isModalOpen} onClose={closeModal}>
+       <section>1. Select your PDF file</section>
+       <section>2. Customize the workflow parameters</section>
+       <section>3. Summarize your document!</section>
+      </Modal>
       <div className="grid">
         <FileSelector
           handleFileChange={handleFileChange}
