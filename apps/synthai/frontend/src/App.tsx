@@ -13,6 +13,7 @@ import PDFDownload from "./components/PDFDownload";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import CopyToClipboardButton from "./components/CopyToClipboardButton";
 
 function App() {
   const [file, setFile] = useState<File | null>(null);
@@ -74,9 +75,9 @@ function App() {
     <div className="main">
       <QuestionButton onClick={openModal} />
       <Modal isOpen={isModalOpen} onClose={closeModal}>
-       <section>1. Select your PDF file</section>
-       <section>2. Customize the workflow parameters</section>
-       <section>3. Summarize your document!</section>
+        <section>1. Select your PDF file</section>
+        <section>2. Customize the workflow parameters</section>
+        <section>3. Summarize your document!</section>
       </Modal>
       <div className="grid">
         <FileSelector
@@ -141,10 +142,13 @@ function App() {
         <div className="button-container">
           <UploadButton handleSubmit={handleSubmit} />
           {summary && (
-            <PDFDownload
-              summary={summary}
-              selectedFileName={selectedFileName}
-            />
+            <div className="inner-button-container">
+              <PDFDownload
+                summary={summary}
+                selectedFileName={selectedFileName}
+              />
+              <CopyToClipboardButton textToCopy={summary} />
+            </div>
           )}
         </div>
       </div>
