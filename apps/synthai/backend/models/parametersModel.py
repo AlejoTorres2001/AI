@@ -6,8 +6,8 @@ class Parameters(BaseModel):
     language: Literal["EN", "SP"]
     max_sequence_length: int
     temperature: float
-    top_k: float
-    top_p: float
+    top_k: float = 0
+    top_p: float = 0
     clusters_number: int
     chunk_size: int
     chunk_overlap: int

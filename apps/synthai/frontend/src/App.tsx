@@ -98,18 +98,6 @@ function App() {
             value={parameters.temperature}
           />
           <Parameter
-            name="top_k"
-            type="range"
-            description="Top K"
-            value={parameters.top_k}
-          />
-          <Parameter
-            name="top_p"
-            type="range"
-            description="Top P"
-            value={parameters.top_p}
-          />
-          <Parameter
             name="clusters_number"
             type="number"
             description="clusters number"

@@ -11,7 +11,7 @@ from langchain.schema.language_model import BaseLanguageModel
 from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
 
 
-def create_llm(task: Literal["summarize"] | Literal["synthesis"]):
+def create_llm(task: Literal["summarize"] | Literal["synthesis"],temperature:float=0,max_tokens:int=1024,):
     """
     Creates a language model for the given task. If the OPENAI_API_KEY is set, it will use the OpenAI API, otherwise it will use the HuggingFace Hub.
 
@@ -28,15 +28,14 @@ def create_llm(task: Literal["summarize"] | Literal["synthesis"]):
         settings = get_settings()
         if settings.OPENAI_API_KEY != None:
 
-            llm = ChatOpenAI(temperature=0,
+            llm = ChatOpenAI(temperature=temperature,
                              openai_api_key=settings.OPENAI_API_KEY,
-                             max_tokens=1000,
+                             max_tokens=max_tokens,
                              model='gpt-3.5-turbo'
-                             ) if task == "summarize" else ChatOpenAI(temperature=0,
+                             ) if task == "summarize" else ChatOpenAI(temperature=temperature,
                                                                       openai_api_key=settings.OPENAI_API_KEY,
-                                                                      max_tokens=3000,
+                                                                      max_tokens=max_tokens,
                                                                       model='gpt-4',
-                                                                      request_timeout=120
                                                                       )
         else:
             llm = HuggingFaceHub(repo_id="tiiuae/falcon-7b-instruct",huggingfacehub_api_token=settings.HUGGINGFACEHUB_API_TOKEN)

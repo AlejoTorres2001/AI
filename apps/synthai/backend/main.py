@@ -48,11 +48,11 @@ async def upload_file(file: UploadFile = File(..., description="a document in PD
 
         ###! ---- Inference ---- ###
 
-        llm3 = create_llm(task="summarize")
-        summaries = await summarize_docs(llm=llm3, prompt=MAP_PROMPT_EN, input_variables=["text"], documents=relevant_documents)
+        sum_llm = create_llm(task="summarize")
+        summaries = await summarize_docs(llm=sum_llm, prompt=MAP_PROMPT_EN, input_variables=["text"], documents=relevant_documents)
 
-        llm4 = create_llm(task="synthesize")
-        result = await synthesis(llm=llm4, prompt=COMBINE_PROMPT_EN, input_variables=["text"], summary_list=summaries)
+        synth_llm = create_llm(task="synthesize")
+        result = await synthesis(llm=synth_llm, prompt=COMBINE_PROMPT_EN, input_variables=["text"], summary_list=summaries)
 
         ###! ---- Response ---- ###
         response_data = {"message": "File summarized correctly",
