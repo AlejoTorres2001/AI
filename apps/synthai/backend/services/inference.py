@@ -11,7 +11,7 @@ from langchain.schema.language_model import BaseLanguageModel
 from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
 
 
-def create_llm(task: Literal["summarize"] | Literal["synthesis"],temperature:float=0,max_tokens:int=1024,):
+def create_llm(task: Literal["summarize"] | Literal["synthesis"], temperature: float = 0, max_tokens: int = 1024,):
     """
     Creates a language model for the given task. If the OPENAI_API_KEY is set, it will use the OpenAI API, otherwise it will use the HuggingFace Hub.
 
@@ -27,7 +27,6 @@ def create_llm(task: Literal["summarize"] | Literal["synthesis"],temperature:flo
     try:
         settings = get_settings()
         if settings.OPENAI_API_KEY != None:
-
             llm = ChatOpenAI(temperature=temperature,
                              openai_api_key=settings.OPENAI_API_KEY,
                              max_tokens=max_tokens,
@@ -38,7 +37,8 @@ def create_llm(task: Literal["summarize"] | Literal["synthesis"],temperature:flo
                                                                       model='gpt-4',
                                                                       )
         else:
-            llm = HuggingFaceHub(repo_id="tiiuae/falcon-7b-instruct",huggingfacehub_api_token=settings.HUGGINGFACEHUB_API_TOKEN)
+            llm = HuggingFaceHub(repo_id="tiiuae/falcon-7b-instruct",
+                                 huggingfacehub_api_token=settings.HUGGINGFACEHUB_API_TOKEN)
         return llm
     except ValueError as e:
         print(e)
@@ -89,15 +89,14 @@ async def summarize_docs(llm: BaseLanguageModel, prompt: str, input_variables: l
     ``summary_list``: The list of summaries.
 
     Raises
-    - ``Exception``: If the any of the chain instances fails.
+    - ``Exception``: If any of the chain instances fail.
     """
     try:
         summary_list = []
-
         map_chain = create_map_summarization_chain(
             llm=llm, prompt=prompt, input_variables=input_variables)
 
-        with concurrent.futures.ProcessPoolExecutor() as executor:
+        with concurrent.futures.ThreadPoolExecutor() as executor:
             future_to_doc = {executor.submit(
                 run_summarization, map_chain, doc): doc for doc in documents}
 
@@ -108,7 +107,7 @@ async def summarize_docs(llm: BaseLanguageModel, prompt: str, input_variables: l
                     summary_list.append(chunk_summary)
                 except Exception as e:
                     print(
-                        f"Error processing document: {doc.content}, error: {e}")
+                        f"Error processing document: {doc.page_content}, error: {e}")
 
         return summary_list
     except Exception as e:
