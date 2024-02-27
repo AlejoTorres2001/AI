@@ -41,7 +41,6 @@ def create_llm(task: Literal["summarize"] | Literal["synthesis"], temperature: f
                                  huggingfacehub_api_token=settings.HUGGINGFACEHUB_API_TOKEN)
         return llm
     except ValueError as e:
-        print(e)
         raise ValueError(
             "The task must be either 'summarize' or 'synthesis' and the OPENAI_API_KEY or the HUGGINGFACEHUB_API_TOKEN must be set.")
 
